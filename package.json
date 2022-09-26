@@ -1,0 +1,26 @@
+{
+  "name": "igme-430-project1",
+  "version": "1.0.0",
+  "description": "IGME 430 Project 1",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Tests complete\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NehaG991/IGME-430-Project1.git"
+  },
+  "author": "Neha Ghanta",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/NehaG991/IGME-430-Project1/issues"
+  },
+  "homepage": "https://github.com/NehaG991/IGME-430-Project1#readme",
+  "devDependencies": {
+    "eslint": "^8.24.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.26.0"
+  }
+}
