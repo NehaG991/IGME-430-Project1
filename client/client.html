@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Tracker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css"> 
+
+    <script>
+        const handleResponse = async (response, parseResponse) => {
+            switch (response.status)
+            {
+                case 200: 
+                    content.innerHTML = `<b>Success</b>`;
+                break;
+                case 201: 
+                    content.innerHTML = `<b>Created</b>`;
+                break;
+                case 204:
+                    content.innerHTML = '<b>Updated (No Content)</b>';
+                break;
+                case 400:
+                    content.innerHTML = `<b>Bad Request</b>`;
+                break;
+                case 404:
+                    content.innerHTML = `<b>Not Found</b>`;
+                break;
+                default: 
+                    content.innerHTML = `Error code not implemented by client.`;
+                break;
+            }
+        };
+
+        const init = () => {
+
+        };
+
+        window.onload = init;
+    </script>
+
+</head>
+<body>
+
+    <header class="has-text-centered">
+        <h1 class="title has-text-white is-size-1">Task Tracker</h1>
+    </header>
+    <hr class="solid">
+
+    <div id="task-creator">
+
+    </div>
+
+    <div class="columns my-3 mx-3" id="task-columns" >
+        <div class="column mx-3" id="to-do-column">
+
+        </div>
+
+        <div class="column mx-3" id="in-progress-column">
+
+        </div>
+
+        <div class="column mx-3" id="done-column">
+
+        </div>
+    </div>
+
+</body>
+</html>
