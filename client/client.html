@@ -49,20 +49,62 @@
     <hr class="solid">
 
     <div id="task-creator">
+        <h3 class="title is-2 has-text-white has-text-centered">Create Tasks</h3>
+
+        <!-- FORM CONTROLS -->
+        <div class="field is-horizontal">
+            <!-- Task Name Form Controls -->
+            <div class="field-label is-normal" id="name-label">
+                <label class="label has-text-white is-size-4" for="name">Task Name: </label>
+            </div>
+            <div class="field-body">
+                <div class="control">
+                    <input type="text" class="input is-medium" name="name" id="nameField">
+                </div>
+            </div>
+
+            <!-- Task Description Form Controls -->
+            <div class="field-label is-normal">
+                <label class="label has-text-white is-size-4" for="description">Description: </label>
+            </div>
+            <div class="field-body">
+                <div class="control">
+                    <input type="text" class="input is-medium" name="description" id="descriptionField">
+                </div>
+            </div>
+
+            <!-- Task Due Date Form Controls -->
+            <div class="field-label is-normal" id="date-label">
+                <label class="label has-text-white is-size-4" for="date">Due Date: </label>
+            </div>
+            <div class="field-body">
+                <div class="control">
+                    <input type="date" class="input is-medium" name="date" id="dueDateField">
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="container">
+            <div class="control">
+                <button class="button is-fullwidth">Submit</button>
+            </div>
+        </div>
 
     </div>
+    <hr class="solid">
 
     <div class="columns my-3 mx-3" id="task-columns" >
         <div class="column mx-3" id="to-do-column">
-
+            <h3 class="subtitle is-3 has-text-white">To Do</h3>
         </div>
 
         <div class="column mx-3" id="in-progress-column">
-
+            <h3 class="subtitle is-3 has-text-white">In Progress</h3>
         </div>
 
         <div class="column mx-3" id="done-column">
-
+            <h3 class="subtitle is-3 has-text-white">Done</h3>
         </div>
     </div>
 

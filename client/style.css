@@ -7,6 +7,12 @@
 
 html {
     background-color: #B8B3E9;
+    -webkit-text-stroke: 1px black;
+}
+
+h3{
+    text-decoration: underline;
+    text-decoration-color: white;
 }
 
 header {
@@ -21,4 +27,12 @@ hr {
     margin-top: 0;
     margin-bottom: 0.5rem;
     height: 7px;
+}
+
+#task-creator {
+    margin-bottom: 0.5rem;
+}
+
+#name-label, #date-label{
+    flex-basis: auto;
 }
