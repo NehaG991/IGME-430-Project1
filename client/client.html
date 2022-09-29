@@ -33,8 +33,30 @@
             }
         };
 
-        const init = () => {
+        const requestUpdate = async (form, url, method) => {
+            
+            // Post Method
+            if (method === 'post')
+            {
+                const nameField = form.querySelector('#name-field');
+                const descriptionField = form.querySelector('#description-field');
+                const dateField = form.querySelector('#duedate-field');
 
+                const formData = `name=${nameField.value}&description=${descriptionField.value}&${dateField.value}`;
+            }
+        };
+
+        const init = () => {
+            const taskForm = document.querySelector('#task-form');
+            const submitButton = taskForm.querySelector('#submit-button');
+
+            // add task function - Post
+            const addTask = (e) => {
+                requestUpdate(taskForm, taskForm.getAttribute('action'), 'post');
+                return false;
+            }
+
+            submitButton.addEventListener('click', addTask);
         };
 
         window.onload = init;
@@ -52,44 +74,46 @@
         <h3 class="title is-2 has-text-white has-text-centered">Create Tasks</h3>
 
         <!-- FORM CONTROLS -->
-        <div class="field is-horizontal">
-            <!-- Task Name Form Controls -->
-            <div class="field-label is-normal" id="name-label">
-                <label class="label has-text-white is-size-4" for="name">Task Name: </label>
-            </div>
-            <div class="field-body">
-                <div class="control">
-                    <input type="text" class="input is-medium" name="name" id="nameField">
+        <form id="task-form" action="/addTask" method="post">
+            <div class="field is-horizontal">
+                <!-- Task Name Form Controls -->
+                <div class="field-label is-normal" id="name-label">
+                    <label class="label has-text-white is-size-4" for="name">Task Name: </label>
+                </div>
+                <div class="field-body">
+                    <div class="control">
+                        <input type="text" class="input is-medium" name="name" id="name-field">
+                    </div>
+                </div>
+    
+                <!-- Task Description Form Controls -->
+                <div class="field-label is-normal">
+                    <label class="label has-text-white is-size-4" for="description">Description: </label>
+                </div>
+                <div class="field-body">
+                    <div class="control">
+                        <input type="text" class="input is-medium" name="description" id="description-field">
+                    </div>
+                </div>
+    
+                <!-- Task Due Date Form Controls -->
+                <div class="field-label is-normal" id="date-label">
+                    <label class="label has-text-white is-size-4" for="date">Due Date: </label>
+                </div>
+                <div class="field-body">
+                    <div class="control">
+                        <input type="date" class="input is-medium" name="date" min="2022-09-28" id="duedate-field">
+                    </div>
                 </div>
             </div>
-
-            <!-- Task Description Form Controls -->
-            <div class="field-label is-normal">
-                <label class="label has-text-white is-size-4" for="description">Description: </label>
-            </div>
-            <div class="field-body">
+    
+            <!-- Submit Button -->
+            <div class="container">
                 <div class="control">
-                    <input type="text" class="input is-medium" name="description" id="descriptionField">
+                    <button class="button is-fullwidth" id="submit-button">Submit</button>
                 </div>
             </div>
-
-            <!-- Task Due Date Form Controls -->
-            <div class="field-label is-normal" id="date-label">
-                <label class="label has-text-white is-size-4" for="date">Due Date: </label>
-            </div>
-            <div class="field-body">
-                <div class="control">
-                    <input type="date" class="input is-medium" name="date" id="dueDateField">
-                </div>
-            </div>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="container">
-            <div class="control">
-                <button class="button is-fullwidth">Submit</button>
-            </div>
-        </div>
+        </form>
 
     </div>
     <hr class="solid">
