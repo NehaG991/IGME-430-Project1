@@ -10,7 +10,7 @@ const urlStruct = {
   '/': htmlHandler.getIndex,
   '/style.css': htmlHandler.getCSS,
   '/addTask': jsonHandler.addTask,
-  anythingElse: htmlHandler.getIndex,
+  anythingElse: htmlHandler.getError,
 };
 
 const onRequest = (request, response) => {

@@ -10,26 +10,37 @@
 
     <script>
         const handleResponse = async (response, parseResponse) => {
+            const statusMessage = document.querySelector('#status');
+
             switch (response.status)
             {
                 case 200: 
-                    content.innerHTML = `<b>Success</b>`;
+                    statusMessage.innerHTML = `<b>Success</b>: `;
                 break;
                 case 201: 
-                    content.innerHTML = `<b>Created</b>`;
+                    statusMessage.innerHTML = `<b>Created</b>: `;
                 break;
                 case 204:
-                    content.innerHTML = '<b>Updated (No Content)</b>';
+                    statusMessage.innerHTML = '<b>Updated (No Content)</b>: ';
                 break;
-                case 400:
-                    content.innerHTML = `<b>Bad Request</b>`;
+                case 400: // DONE
+                    statusMessage.innerHTML = `<b>Bad Request</b>: `;
                 break;
                 case 404:
-                    content.innerHTML = `<b>Not Found</b>`;
+                    statusMessage.innerHTML = `<b>Not Found</b>: `;
                 break;
                 default: 
-                    content.innerHTML = `Error code not implemented by client.`;
+                    statusMessage.innerHTML = `Error code not implemented by client.`;
                 break;
+            }
+
+            if (parseResponse){
+                let obj = await response.json();
+                console.log(obj);
+                
+                // Prints message (Removes quotes as well to make formatting better)
+                let messageString = JSON.stringify(obj.message);
+                statusMessage.innerHTML += `<b>${messageString.replace(/['"]+/g, '')}</b>`;
             }
         };
 
@@ -42,7 +53,33 @@
                 const descriptionField = form.querySelector('#description-field');
                 const dateField = form.querySelector('#duedate-field');
 
-                const formData = `name=${nameField.value}&description=${descriptionField.value}&${dateField.value}`;
+                const formData = `name=${nameField.value}&description=${descriptionField.value}&duedate=${dateField.value}`;
+                
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/x-ww-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: formData,
+                };
+
+                let fetchPromise = fetch(url, options);
+
+                // Won't parse if status code is 204
+                fetchPromise.then((response) => {handleResponse(response, response.status !== 204)});
+            } else {
+
+                // Get/Head Method
+                const options = {
+                    method: method,
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                };
+
+                let fetchPromise = fetch(url, options);
+                fetchPromise.then((response) => {handleResponse(response, method === 'get')});
             }
         };
 
@@ -52,6 +89,7 @@
 
             // add task function - Post
             const addTask = (e) => {
+                e.preventDefault();
                 requestUpdate(taskForm, taskForm.getAttribute('action'), 'post');
                 return false;
             }
@@ -114,6 +152,16 @@
                 </div>
             </div>
         </form>
+
+        <!-- Button to Load Previous Created Tasks if they were saved to local storage-->
+        <div class="container mt-5">
+            <div class="control">
+                <button class="button is-fullwidth" id="load-button">Load Previously Created Tasks</button>
+            </div>
+        </div>
+
+        <h2 class="subtitle has-text-white is-size-3 has-text-centered my-0" id="status"></h2>
+
 
     </div>
     <hr class="solid">
