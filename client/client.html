@@ -10,7 +10,13 @@
 
     <script>
         const handleResponse = async (response, parseResponse) => {
+
+            // Document objects
             const statusMessage = document.querySelector('#status');
+            const toDoColumn = document.querySelector('#to-do-column');
+            const inProgressColumn = document.querySelector('#in-progress-column');
+            const doneColumn = document.querySelector('#done-column');
+
 
             switch (response.status)
             {
@@ -26,7 +32,7 @@
                 case 400: // DONE
                     statusMessage.innerHTML = `<b>Bad Request</b>: `;
                 break;
-                case 404:
+                case 404: // DONE
                     statusMessage.innerHTML = `<b>Not Found</b>: `;
                 break;
                 default: 
@@ -41,6 +47,13 @@
                 // Prints message (Removes quotes as well to make formatting better)
                 let messageString = JSON.stringify(obj.message);
                 statusMessage.innerHTML += `<b>${messageString.replace(/['"]+/g, '')}</b>`;
+
+                if (response.status === 201)
+                {
+                    console.log(obj.toDo);
+                    // How to access properties of each task
+                    console.log(Object.entries(obj.toDo)[0][1].name);
+                }
             }
         };
 
@@ -83,9 +96,32 @@
             }
         };
 
+        // Sets min for date field to current date
+        const setDate = (dateField) => {
+            const date = new Date();
+            let day = date.getDate();
+            if (day < 10){
+                day.toString();
+                day = "0" + day;
+            }
+
+            let month = date.getMonth() + 1;
+            if (month < 10){
+                month.toString();
+                month = "0" + month;
+            }
+
+            let currentDate = `${date.getFullYear()}-${month}-${day}`;
+            dateField.setAttribute('min', currentDate);
+        }
+
         const init = () => {
             const taskForm = document.querySelector('#task-form');
             const submitButton = taskForm.querySelector('#submit-button');
+            const dateField = taskForm.querySelector('#duedate-field');
+
+            // Update min on date field
+            setDate(dateField);
 
             // add task function - Post
             const addTask = (e) => {
@@ -109,7 +145,7 @@
     <hr class="solid">
 
     <div id="task-creator">
-        <h3 class="title is-2 has-text-white has-text-centered">Create Tasks</h3>
+        <h3 class="title is-2 has-text-white has-text-centered">Create/Update Tasks</h3>
 
         <!-- FORM CONTROLS -->
         <form id="task-form" action="/addTask" method="post">
@@ -154,7 +190,7 @@
         </form>
 
         <!-- Button to Load Previous Created Tasks if they were saved to local storage-->
-        <div class="container mt-5">
+        <div class="container mt-2">
             <div class="control">
                 <button class="button is-fullwidth" id="load-button">Load Previously Created Tasks</button>
             </div>
