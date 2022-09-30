@@ -9,21 +9,105 @@
     <link rel="stylesheet" type="text/css" href="style.css"> 
 
     <script>
+
+        // Task Card template
+        const template = document.createElement('template');
+        template.innerHTML = `
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+        <style>
+            .content{
+                outline: 5px solid black;
+            }
+
+            p{
+                background-color: #7a6105;
+                box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
+                text-align: center;
+                border-radius: 5px;
+            }
+        </style>
+        <div class="content px-2 pb-2">
+            <label class="label has-text-white mb-0 mt-4 has-text-centered">Name of Task</label>
+            <p class="title is-size-3 m-0 mb-2 has-text-white px-3" id="name">Name of Task</p>
+
+            <label class="label has-text-white mb-0 mt-4 has-text-centered">Duedate</label>
+            <p class="title is-size-3 m-0 mb-2 has-text-white px-3" id="due-date">Due Date</p>
+
+            <label class="label has-text-white mb-0 mt-4 has-text-centered">Description</label>
+            <p class="px-3 has-text-white is-size-5" id="description"></p>
+        </div>
+        `;
+
+        class TaskCard extends HTMLElement{
+            constructor(){
+                super();
+                this.attachShadow({mode: "open"});
+                this.shadowRoot.appendChild(template.content.cloneNode(true));
+
+                this.taskName = this.shadowRoot.querySelector("#name");
+                this.taskDueDate = this.shadowRoot.querySelector("#due-date");
+                this.taskDescription = this.shadowRoot.querySelector("#description");
+            }
+
+            connectedCallback(){
+                this.render();
+            }
+
+            static get observedAttributes(){
+                return["data-name", "data-date", "data-description"];
+            }
+
+            render(){
+                const name = this.getAttribute('data-name') ? this.getAttribute('data-name') : "Name of Task";
+                const dueDate = this.getAttribute('data-date') ? this.getAttribute('data-date') : "Due date of Task";
+                const description = this.getAttribute('data-description') ? this.getAttribute('data-description') : "No Description";
+
+
+                this.taskName.innerHTML = name;
+                this.taskDueDate.innerHTML = dueDate;
+                this.taskDescription.innerHTML = description;
+            }
+        };
+        customElements.define('task-card', TaskCard);
+
+        // HELPER FUNCTION - to clear content in columns before updating
+        function clearResult(parent) {
+            while (parent.firstChild)
+            {
+                parent.removeChild(parent.firstChild);
+            }
+        }
+
+        // function that updates to do cards 
+        function updateToDo(obj) {
+            const toDoColumn = document.querySelector('#to-do-content');
+            clearResult(toDoColumn);
+
+            // Loops through to do tasks, creates cards for each one, and attaches it to the to do column
+            for (let i = 0; i < obj.length; i++)
+            {
+                let card = document.createElement("task-card");
+                card.dataset.name = obj[i][1].name;
+                card.dataset.date = obj[i][1].duedate;
+                card.dataset.description = obj[i][1].description;
+                toDoColumn.appendChild(card);
+            }
+        };
+
+
         const handleResponse = async (response, parseResponse) => {
 
             // Document objects
             const statusMessage = document.querySelector('#status');
-            const toDoColumn = document.querySelector('#to-do-column');
             const inProgressColumn = document.querySelector('#in-progress-column');
             const doneColumn = document.querySelector('#done-column');
-
 
             switch (response.status)
             {
                 case 200: 
                     statusMessage.innerHTML = `<b>Success</b>: `;
                 break;
-                case 201: 
+                case 201: // 201
                     statusMessage.innerHTML = `<b>Created</b>: `;
                 break;
                 case 204:
@@ -48,11 +132,16 @@
                 let messageString = JSON.stringify(obj.message);
                 statusMessage.innerHTML += `<b>${messageString.replace(/['"]+/g, '')}</b>`;
 
+                // Updates toDo column when user creates new task
                 if (response.status === 201)
                 {
-                    console.log(obj.toDo);
+                    //console.log(obj.toDo);
                     // How to access properties of each task
-                    console.log(Object.entries(obj.toDo)[0][1].name);
+                    //console.log(Object.entries(obj.toDo)[0][1].name);
+
+                    // Makes todo list into an array and calls function to update client view with new tasks
+                    let toDoArray = Object.entries(obj.toDo);
+                    updateToDo(toDoArray);
                 }
             }
         };
@@ -196,7 +285,7 @@
             </div>
         </div>
 
-        <h2 class="subtitle has-text-white is-size-3 has-text-centered my-0" id="status"></h2>
+        <h2 class="subtitle has-text-white is-size-3 has-text-centered py-2" id="status"></h2>
 
 
     </div>
@@ -205,6 +294,9 @@
     <div class="columns my-3 mx-3" id="task-columns" >
         <div class="column mx-3" id="to-do-column">
             <h3 class="subtitle is-3 has-text-white">To Do</h3>
+            <div id="to-do-content">
+
+            </div>
         </div>
 
         <div class="column mx-3" id="in-progress-column">

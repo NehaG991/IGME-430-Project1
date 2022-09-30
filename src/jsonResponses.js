@@ -30,9 +30,9 @@ const addTask = (request, response) => {
 
     const responseJSON = {
       message: 'Name and Due Date are both required.',
-      toDo: toDo,
-      inProgress: inProgress,
-      done: done,
+      toDo,
+      inProgress,
+      done,
     };
 
     // Checks if user inputted a name or a due date
@@ -44,10 +44,9 @@ const addTask = (request, response) => {
     let statusCode = 204;
 
     // Checks if task already exists
-    if (!toDo[body.name] && !inProgress[body.name] && !done[body.name])
-    {
+    if (!toDo[body.name] && !inProgress[body.name] && !done[body.name]) {
       statusCode = 201;
-      toDo[body.name] = {}; 
+      toDo[body.name] = {};
 
       // Add fields to new task
       toDo[body.name].name = body.name;
@@ -61,9 +60,7 @@ const addTask = (request, response) => {
       return respondJSON(request, response, responseJSON, statusCode);
     }
 
-
-
-
+    return respondJSONMeta(request, response, statusCode);
   });
 };
 
