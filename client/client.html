@@ -25,8 +25,12 @@
                 text-align: center;
                 border-radius: 5px;
             }
+
+            button{
+                border: 2px solid black;
+            }
         </style>
-        <div class="content px-2 pb-2">
+        <div class="content px-2 pb-2 mb-5">
             <label class="label has-text-white mb-0 mt-4 has-text-centered">Name of Task</label>
             <p class="title is-size-3 m-0 mb-2 has-text-white px-3" id="name">Name of Task</p>
 
@@ -35,6 +39,12 @@
 
             <label class="label has-text-white mb-0 mt-4 has-text-centered">Description</label>
             <p class="px-3 has-text-white is-size-5" id="description"></p>
+
+            <button class="button is-small is-pulled-right" id="move-progress">Move to In Progress</button>
+            <button class="button is-small is-pulled-right" id="move-done">Move to Done</button>
+
+            <button class="button is-small is-pulled-left" id="move-back-progress">Move to In Progress</button>
+            <button class="button is-small is-pulled-left" id="move-back-todo">Move to To Do</button>
         </div>
         `;
 
@@ -47,6 +57,12 @@
                 this.taskName = this.shadowRoot.querySelector("#name");
                 this.taskDueDate = this.shadowRoot.querySelector("#due-date");
                 this.taskDescription = this.shadowRoot.querySelector("#description");
+
+                // Buttons to move 
+                this.moveInProgressButton = this.shadowRoot.querySelector("#move-progress");
+                this.moveDoneButton = this.shadowRoot.querySelector("#move-done");
+                this.moveBackInProgressButton = this.shadowRoot.querySelector("#move-back-progress");
+                this.moveBackToDoButton = this.shadowRoot.querySelector("#move-back-todo");
             }
 
             connectedCallback(){
@@ -78,29 +94,7 @@
             }
         }
 
-        // function that updates to do cards 
-        function updateToDo(obj) {
-            const toDoColumn = document.querySelector('#to-do-content');
-            clearResult(toDoColumn);
-
-            // Loops through to do tasks, creates cards for each one, and attaches it to the to do column
-            for (let i = 0; i < obj.length; i++)
-            {
-                let card = document.createElement("task-card");
-                card.dataset.name = obj[i][1].name;
-                card.dataset.date = obj[i][1].duedate;
-                card.dataset.description = obj[i][1].description;
-                toDoColumn.appendChild(card);
-            }
-        };
-
-
         const handleResponse = async (response, parseResponse) => {
-
-            // Document objects
-            const statusMessage = document.querySelector('#status');
-            const inProgressColumn = document.querySelector('#in-progress-column');
-            const doneColumn = document.querySelector('#done-column');
 
             switch (response.status)
             {
@@ -108,7 +102,7 @@
                     statusMessage.innerHTML = `<b>Success</b>: `;
                 break;
                 case 201: // 201
-                    statusMessage.innerHTML = `<b>Created</b>: `;
+                    statusMessage.innerHTML = ``;
                 break;
                 case 204:
                     statusMessage.innerHTML = '<b>Updated (No Content)</b>: ';
@@ -133,18 +127,87 @@
                 statusMessage.innerHTML += `<b>${messageString.replace(/['"]+/g, '')}</b>`;
 
                 // Updates toDo column when user creates new task
-                if (response.status === 201)
+                if (response.status !== 400)
                 {
                     //console.log(obj.toDo);
                     // How to access properties of each task
                     //console.log(Object.entries(obj.toDo)[0][1].name);
 
                     // Makes todo list into an array and calls function to update client view with new tasks
-                    let toDoArray = Object.entries(obj.toDo);
-                    updateToDo(toDoArray);
+                    let toDoArray = Object.entries(obj.tasks);
+                    updateTasks(toDoArray);
                 }
             }
         };
+
+        // Method for when user moves the task to a new column
+        const moveTask = async (url, movingTo, taskName) => {
+            const formData = `newColumn=${movingTo}&name=${taskName}`;
+
+            const options = {
+                method: 'post',
+                headers: {
+                        'Content-Type': 'application/x-ww-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                body: formData,
+            };
+
+            let fetchPromise = fetch(url, options);
+
+            // Won't parse if status code is 204
+            fetchPromise.then((response) => {handleResponse(response, true)});
+        };
+
+        // Updates client view with tasks
+        function updateTasks(obj) {
+
+            // Clearing Columns
+            const doneColumn= document.querySelector('#done-content');
+            clearResult(doneColumn);
+            const inProgressColumn= document.querySelector('#in-progress-content');
+            clearResult(inProgressColumn);
+            const toDoColumn = document.querySelector('#to-do-content');
+            clearResult(toDoColumn);
+
+            // Loops through to do tasks, creates cards for each one, and attaches it to the to do column
+            for (let i = 0; i < obj.length; i++)
+            {
+                let card = document.createElement("task-card");
+                card.dataset.name = obj[i][1].name;
+                card.dataset.date = obj[i][1].duedate;
+                card.dataset.description = obj[i][1].description;
+
+                // To Do Tasks
+                if (obj[i][1].column === 'toDo')
+                {
+                    card.moveDoneButton.style.display = 'none';
+                    card.moveBackInProgressButton.style.display = 'none';
+                    card.moveBackToDoButton.style.display = 'none';
+
+                    card.moveInProgressButton.onclick = () => moveTask('/moveTask', 'progress', obj[i][1].name);
+                    toDoColumn.appendChild(card);
+                }
+                // In progress tasks
+                else if (obj[i][1].column === 'progress') {
+                    card.moveInProgressButton.style.display = 'none'
+                    card.moveBackInProgressButton.style.display = 'none';
+
+                    card.moveDoneButton.onclick = () => moveTask('/moveTask', 'done', obj[i][1].name);
+                    card.moveBackToDoButton.onclick = () => moveTask('/moveTask', 'toDo', obj[i][1].name);
+                    inProgressColumn.appendChild(card);
+                }
+                // Done cards
+                else {
+                    card.moveDoneButton.style.display = 'none';
+                    card.moveInProgressButton.style.display = 'none'
+                    card.moveBackToDoButton.style.display = 'none';
+
+                    card.moveBackInProgressButton.onclick = () => moveTask('/moveTask', 'progress', obj[i][1].name);
+                    doneColumn.appendChild(card);
+                }
+            }
+        }
 
         const requestUpdate = async (form, url, method) => {
             
@@ -185,7 +248,7 @@
             }
         };
 
-        // Sets min for date field to current date
+        // HELPER - Sets min for date field to current date
         const setDate = (dateField) => {
             const date = new Date();
             let day = date.getDate();
@@ -281,7 +344,7 @@
         <!-- Button to Load Previous Created Tasks if they were saved to local storage-->
         <div class="container mt-2">
             <div class="control">
-                <button class="button is-fullwidth" id="load-button">Load Previously Created Tasks</button>
+                <button class="button is-fullwidth" id="load-button">Refresh Tasks</button>
             </div>
         </div>
 
@@ -301,10 +364,16 @@
 
         <div class="column mx-3" id="in-progress-column">
             <h3 class="subtitle is-3 has-text-white">In Progress</h3>
+            <div id="in-progress-content">
+
+            </div>
         </div>
 
         <div class="column mx-3" id="done-column">
             <h3 class="subtitle is-3 has-text-white">Done</h3>
+            <div id="done-content">
+
+            </div>
         </div>
     </div>
 

@@ -1,9 +1,7 @@
 const query = require('querystring');
 
 // variables to hold tasks
-const toDo = {};
-const inProgress = {};
-const done = {};
+const tasks = {};
 
 const respondJSON = (request, response, object, statusCode) => {
   response.writeHead(statusCode, { 'Content-Type': 'application/json' });
@@ -16,7 +14,7 @@ const respondJSONMeta = (request, response, status) => {
   response.end();
 };
 
-// For adding tasks to to do list
+// For adding/editing tasks - POST
 const addTask = (request, response) => {
   const oldBody = [];
 
@@ -30,9 +28,7 @@ const addTask = (request, response) => {
 
     const responseJSON = {
       message: 'Name and Due Date are both required.',
-      toDo,
-      inProgress,
-      done,
+      tasks,
     };
 
     // Checks if user inputted a name or a due date
@@ -44,17 +40,18 @@ const addTask = (request, response) => {
     let statusCode = 204;
 
     // Checks if task already exists
-    if (!toDo[body.name] && !inProgress[body.name] && !done[body.name]) {
+    if (!tasks[body.name]) {
       statusCode = 201;
-      toDo[body.name] = {};
+      tasks[body.name] = {};
 
       // Add fields to new task
-      toDo[body.name].name = body.name;
-      toDo[body.name].description = body.description;
-      toDo[body.name].duedate = body.duedate;
+      tasks[body.name].name = body.name;
+      tasks[body.name].description = body.description;
+      tasks[body.name].duedate = body.duedate;
+      tasks[body.name].column = 'toDo';
 
       // Update Response
-      responseJSON.toDo = toDo;
+      responseJSON.tasks = tasks;
       responseJSON.message = 'Created Successfully';
 
       return respondJSON(request, response, responseJSON, statusCode);
@@ -64,7 +61,7 @@ const addTask = (request, response) => {
   });
 };
 
-// Invalid url Method
+// Invalid url Method - GET
 const anythingElse = (request, response) => {
   const responseJSON = {
     message: 'The page you are looking for was not found',
@@ -74,7 +71,60 @@ const anythingElse = (request, response) => {
   return respondJSON(request, response, responseJSON, 404);
 };
 
+// Moves data to specified column - POST
+const moveTask = (request, response) => {
+  const oldBody = [];
+
+  request.on('data', (chunk) => {
+    oldBody.push(chunk);
+  });
+
+  request.on('end', () => {
+    const bodyString = Buffer.concat(oldBody).toString();
+    const body = query.parse(bodyString);
+
+    const responseJSON = {
+      message: 'Message',
+      tasks,
+    };
+
+    const statusCode = 201;
+
+    // Move to toDo
+    if (body.newColumn === 'toDo') {
+      // Changing task column
+      tasks[body.name].column = 'toDo';
+
+      responseJSON.message = `Moved Task: ${body.name} to To Do Column`;
+      responseJSON.tasks = tasks;
+
+      return respondJSON(request, response, responseJSON, statusCode);
+    }
+
+    if (body.newColumn === 'progress') {
+      tasks[body.name].column = 'progress';
+
+      responseJSON.message = `Moved Task: ${body.name} to In Progress Column`;
+      responseJSON.tasks = tasks;
+
+      return respondJSON(request, response, responseJSON, statusCode);
+    }
+
+    if (body.newColumn === 'done') {
+      tasks[body.name].column = 'done';
+
+      responseJSON.message = `Moved Task: ${body.name} to Done Column`;
+      responseJSON.tasks = tasks;
+
+      return respondJSON(request, response, responseJSON, statusCode);
+    }
+
+    return respondJSONMeta(request, response, statusCode);
+  });
+};
+
 module.exports = {
   addTask,
   anythingElse,
+  moveTask,
 };
