@@ -11,6 +11,7 @@ const urlStruct = {
   '/style.css': htmlHandler.getCSS,
   '/addTask': jsonHandler.addTask,
   '/moveTask': jsonHandler.moveTask,
+  '/getTasks': jsonHandler.getTasks,
   anythingElse: htmlHandler.getError,
 };
 

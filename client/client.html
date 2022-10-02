@@ -95,17 +95,17 @@
         }
 
         const handleResponse = async (response, parseResponse) => {
-
+            const statusMessage = document.querySelector('#status');
             switch (response.status)
             {
-                case 200: 
-                    statusMessage.innerHTML = `<b>Success</b>: `;
+                case 200: // DONE
+                    statusMessage.innerHTML = `<b>Refreshed Task Page</b>`;
                 break;
-                case 201: // 201
+                case 201: // DONE
                     statusMessage.innerHTML = ``;
                 break;
-                case 204:
-                    statusMessage.innerHTML = '<b>Updated (No Content)</b>: ';
+                case 204: // DONE
+                    statusMessage.innerHTML = '<b>Updated. Press Refresh Button</b>: ';
                 break;
                 case 400: // DONE
                     statusMessage.innerHTML = `<b>Bad Request</b>: `;
@@ -123,19 +123,19 @@
                 console.log(obj);
                 
                 // Prints message (Removes quotes as well to make formatting better)
-                let messageString = JSON.stringify(obj.message);
-                statusMessage.innerHTML += `<b>${messageString.replace(/['"]+/g, '')}</b>`;
+                if (obj.message !== undefined){
+                    let messageString = JSON.stringify(obj.message);
+                    statusMessage.innerHTML += `<b>${messageString.replace(/['"]+/g, '')}</b>`;
+                }
 
                 // Updates toDo column when user creates new task
                 if (response.status !== 400)
                 {
-                    //console.log(obj.toDo);
-                    // How to access properties of each task
-                    //console.log(Object.entries(obj.toDo)[0][1].name);
 
                     // Makes todo list into an array and calls function to update client view with new tasks
                     let toDoArray = Object.entries(obj.tasks);
                     updateTasks(toDoArray);
+                    
                 }
             }
         };
@@ -271,6 +271,7 @@
             const taskForm = document.querySelector('#task-form');
             const submitButton = taskForm.querySelector('#submit-button');
             const dateField = taskForm.querySelector('#duedate-field');
+            const refreshButton = document.querySelector('#load-button');
 
             // Update min on date field
             setDate(dateField);
@@ -282,7 +283,15 @@
                 return false;
             }
 
+            // Get Task Function - GET
+            const getTask = (e) => {
+                e.preventDefault();
+                requestUpdate(null, '/getTasks', 'get');
+                return false;
+            }
+
             submitButton.addEventListener('click', addTask);
+            refreshButton.addEventListener('click', getTask);
         };
 
         window.onload = init;
@@ -341,7 +350,7 @@
             </div>
         </form>
 
-        <!-- Button to Load Previous Created Tasks if they were saved to local storage-->
+        <!-- Button to Load Previous Created Tasks if they were saved to local storage or updated-->
         <div class="container mt-2">
             <div class="control">
                 <button class="button is-fullwidth" id="load-button">Refresh Tasks</button>

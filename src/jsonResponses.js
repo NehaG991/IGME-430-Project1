@@ -1,6 +1,6 @@
 const query = require('querystring');
 
-// variables to hold tasks
+// variable to hold tasks
 const tasks = {};
 
 const respondJSON = (request, response, object, statusCode) => {
@@ -57,6 +57,14 @@ const addTask = (request, response) => {
       return respondJSON(request, response, responseJSON, statusCode);
     }
 
+    // Updates description and due date field
+    // Only updates description field if it's not empty
+    if (body.description !== '') {
+      tasks[body.name].description = body.description;
+    }
+
+    tasks[body.name].duedate = body.duedate;
+
     return respondJSONMeta(request, response, statusCode);
   });
 };
@@ -68,7 +76,11 @@ const anythingElse = (request, response) => {
     id: 'notFound',
   };
 
-  return respondJSON(request, response, responseJSON, 404);
+  if (request.method === 'GET') {
+    return respondJSON(request, response, responseJSON, 404);
+  }
+
+  return respondJSONMeta(request, response, 404);
 };
 
 // Moves data to specified column - POST
@@ -123,8 +135,21 @@ const moveTask = (request, response) => {
   });
 };
 
+// Returns Task Data - GET
+const getTasks = (request, response) => {
+  const responseJSON = {
+    tasks,
+  };
+
+  if (request.method === 'GET') {
+    return respondJSON(request, response, responseJSON, 200);
+  }
+  return respondJSONMeta(request, response, 200);
+};
+
 module.exports = {
   addTask,
   anythingElse,
   moveTask,
+  getTasks,
 };
