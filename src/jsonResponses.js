@@ -31,16 +31,16 @@ const addTask = (request, response) => {
       tasks,
     };
 
-    // Checks if user inputted a name or a due date
-    if (!body.name || !body.duedate) {
-      responseJSON.id = 'addTaskMissingParams';
-      return respondJSON(request, response, responseJSON, 400);
-    }
-
     let statusCode = 204;
 
     // Checks if task already exists
     if (!tasks[body.name]) {
+      // Checks if user inputted a name or a due date
+      if (!body.name || !body.duedate) {
+        responseJSON.id = 'addTaskMissingParams';
+        return respondJSON(request, response, responseJSON, 400);
+      }
+
       statusCode = 201;
       tasks[body.name] = {};
 
@@ -63,7 +63,9 @@ const addTask = (request, response) => {
       tasks[body.name].description = body.description;
     }
 
-    tasks[body.name].duedate = body.duedate;
+    if (body.duedate !== '') {
+      tasks[body.name].duedate = body.duedate;
+    }
 
     return respondJSONMeta(request, response, statusCode);
   });
@@ -136,10 +138,39 @@ const moveTask = (request, response) => {
 };
 
 // Returns Task Data - GET
-const getTasks = (request, response) => {
+const getTasks = (request, response, params) => {
+  if (!params.date) {
+    const responseJSON = {
+      tasks,
+    };
+
+    if (request.method === 'GET') {
+      return respondJSON(request, response, responseJSON, 200);
+    }
+    return respondJSONMeta(request, response, 200);
+  }
+
+  // Loop through task array to find tasks with due date
+  const taskArray = Object.entries(tasks);
+  const dateTasks = {};
+  for (let i = 0; i < taskArray.length; i++) {
+    if (taskArray[i][1].duedate === params.date) {
+      dateTasks[taskArray[i][1].name] = {};
+      dateTasks[taskArray[i][1].name].name = taskArray[i][1].name;
+      dateTasks[taskArray[i][1].name].description = taskArray[i][1].description;
+      dateTasks[taskArray[i][1].name].duedate = taskArray[i][1].duedate;
+      dateTasks[taskArray[i][1].name].column = taskArray[i][1].column;
+    }
+  }
+
   const responseJSON = {
-    tasks,
+    message: ': No Tasks with That Due Date',
+    tasks: dateTasks,
   };
+
+  if (Object.keys(dateTasks).length !== 0) {
+    responseJSON.message = ': Showing tasks with specified date';
+  }
 
   if (request.method === 'GET') {
     return respondJSON(request, response, responseJSON, 200);

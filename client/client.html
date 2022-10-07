@@ -120,7 +120,7 @@
 
             if (parseResponse){
                 let obj = await response.json();
-                console.log(obj);
+                //console.log(obj);
                 
                 // Prints message (Removes quotes as well to make formatting better)
                 if (obj.message !== undefined){
@@ -132,9 +132,9 @@
                 if (response.status !== 400)
                 {
 
-                    // Makes todo list into an array and calls function to update client view with new tasks
-                    let toDoArray = Object.entries(obj.tasks);
-                    updateTasks(toDoArray);
+                    // Makes task list into an array and calls function to update client view with new tasks
+                    let taskArray = Object.entries(obj.tasks);
+                    updateTasks(taskArray);
                     
                 }
             }
@@ -162,13 +162,17 @@
         // Updates client view with tasks
         function updateTasks(obj) {
 
-            // Clearing Columns
+            // Clearing Columns and task params
             const doneColumn= document.querySelector('#done-content');
             clearResult(doneColumn);
             const inProgressColumn= document.querySelector('#in-progress-content');
             clearResult(inProgressColumn);
             const toDoColumn = document.querySelector('#to-do-content');
             clearResult(toDoColumn);
+
+            const nameField = document.querySelector('#name-field').value = '';
+            const descriptionField = document.querySelector('#description-field').value = '';
+            const dateField = document.querySelector('#duedate-field').value = '';
 
             // Loops through to do tasks, creates cards for each one, and attaches it to the to do column
             for (let i = 0; i < obj.length; i++)
@@ -292,6 +296,9 @@
 
             submitButton.addEventListener('click', addTask);
             refreshButton.addEventListener('click', getTask);
+            
+            // Calling get tasks to load created tasks
+            requestUpdate(null, '/getTasks', 'get');
         };
 
         window.onload = init;

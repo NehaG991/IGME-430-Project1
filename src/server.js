@@ -1,5 +1,6 @@
 const http = require('http');
 const url = require('url');
+const query = require('querystring');
 
 const htmlHandler = require('./htmlResponses.js');
 const jsonHandler = require('./jsonResponses.js');
@@ -17,9 +18,10 @@ const urlStruct = {
 
 const onRequest = (request, response) => {
   const parsedURL = url.parse(request.url);
+  const params = query.parse(parsedURL.query);
 
   if (urlStruct[parsedURL.pathname]) {
-    urlStruct[parsedURL.pathname](request, response);
+    urlStruct[parsedURL.pathname](request, response, params);
   } else {
     urlStruct.anythingElse(request, response);
   }
